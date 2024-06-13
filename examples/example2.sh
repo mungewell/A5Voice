@@ -20,19 +20,22 @@ export soxp="-r 48k -e signed -b 16 -c 2 --endian little"
 
 for target in "$@"
 do
-	echo processing $target to $waveform
+	export samples=`soxi -s $target`
+	echo "processing $target ($samples) to $waveform"
 
 	# convert to raw and reduce gain by 3dB
-	sox $target $soxp $target".raw" gain -3
+	sox $target -r 44100 -e signed -b 16 -c 1 $target".raw" gain -3
 
 	# double up into two consequetive waveforms
 	# (believe ASM does to allow/alter phase angle)
 	cat $target".raw" $target".raw" > temp.raw
 
 	# build 16k, 8k, 4k 'masters' with correct number of samples
-	sox $soxp temp.raw $target"_8k.raw" rate 75271.056661562
-	sox $soxp temp.raw $target"_4k.raw" rate 37635.528330781
-	sox $soxp temp.raw $target"_16k.raw" rate 150542.113323124
+	export rate=`echo "" | awk "{print (48000 * (4096 / $samples))}"`
+
+	sox $soxp temp.raw $target"_16k.raw" rate $rate
+	sox $soxp temp.raw $target"_8k.raw" rate `echo "$rate / 2"|bc`
+	sox $soxp temp.raw $target"_4k.raw" rate `echo "$rate / 4"|bc`
 
 	# create parts for each waveform
 	# these should be filtered, but we don't yet know how.
