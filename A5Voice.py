@@ -145,6 +145,23 @@ A5VOICE = Struct(
         "footer" /  Pointer(0x015ffffc, FOOT)
 )
 
+A5VOICE_DAT = Struct(
+        Const(b"A5Pack\x00"),
+        "type" / Enum(Bytes(2),
+                explorer    = b"MS",
+                desktop     = b"DR",
+                delux       = b"7X",
+                leyboard    = b"KB",
+        ),
+
+        Const(b"\x00\x00"),
+        Padded(79, Const(b"All Rights Reserved")),
+        "name" / PaddedString(21, "ascii"),
+
+        Padded(22, Const(b"A5 voice")),
+        Const(b"\x60\x01"),
+)
+
 #---------------------------------------------
 
 import os
@@ -178,6 +195,13 @@ def main():
     parser.add_option("-o", "--output", dest="outfile",
         help="rebuild/rewrite data to OUTFILE")
 
+    parser.add_option("--dat",
+        action="store_true", dest="dat",
+        help="output in 'dat' format ready to uploaded to synth")
+    parser.add_option("-n", "--name",
+        dest="name", default="Hack-The-Planet!",
+        help="name/version for the 'dat' pack")
+
     (options, args) = parser.parse_args()
 
     if len(args) != 1:
@@ -192,7 +216,15 @@ def main():
     infile.close()
 
     if data:
-        a5voice = A5VOICE.parse(data[0x00000000:])
+        try:
+            a5voice_dat = A5VOICE_DAT.parse(data)
+        except:
+            a5voice_dat = None
+
+        if a5voice_dat:
+            a5voice = A5VOICE.parse(data[0x87:])
+        else:
+            a5voice = A5VOICE.parse(data)
 
         if options.dump:
             print(a5voice)
@@ -264,10 +296,19 @@ def main():
         if options.outfile:
             data = A5VOICE.build(a5voice)
 
+            if len(data) > 0x01600000:
+                sys.exit("Data too large for writing")
+
             print("Writing data to file:", options.outfile)
             outfile = open(options.outfile, "wb")
             if not outfile:
                 sys.exit("Unable to open FILE for writing")
+
+            if options.dat:
+                outfile.write(A5VOICE_DAT.build({
+                    "type":"explorer",
+                    "name":options.name,
+                }))
 
             outfile.write(data)
             outfile.close()
