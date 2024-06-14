@@ -148,15 +148,15 @@ A5VOICE = Struct(
 A5VOICE_DAT = Struct(
         Const(b"A5Pack\x00"),
         "type" / Enum(Bytes(2),
-                explorer    = b"MS",
+                keyboard    = b"KB",
                 desktop     = b"DR",
+                explorer    = b"3M",
                 delux       = b"7X",
-                leyboard    = b"KB",
         ),
 
         Const(b"\x00\x00"),
-        Padded(79, Const(b"All Rights Reserved")),
-        "name" / PaddedString(21, "ascii"),
+        Padded(80, Const(b"All Rights Reserved")),
+        "name" / PaddedString(20, "ascii"),
 
         Padded(22, Const(b"A5 voice")),
         Const(b"\x60\x01"),
