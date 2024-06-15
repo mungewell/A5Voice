@@ -19,7 +19,7 @@ REM within the 'factory' pack 218 is the highest with data, 219 is blank
 set waveform=218
 
 REM http://sox.sourceforge.net/
-set sox="C:\Program Files (x86)\sox-14.4.2\sox.exe"
+set sox="C:\Program Files (x86)\sox-14-4-2\sox.exe"
 set soxp=-r 48k -e signed -b 16 -c 2 --endian little
 
 if "%1"=="" goto end
