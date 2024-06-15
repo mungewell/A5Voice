@@ -120,7 +120,8 @@ def main():
 
             # auto-magically determine segment size
             if not options.size:
-                options.size = 0x01600000
+                #options.size = 0x01600000
+                options.size = 1506
 
             print("Writing data to file:", args[0])
             outfile = open(args[0], "wb")
