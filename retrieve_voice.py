@@ -2,10 +2,6 @@
 
 # modified implementation of 'TCP' checksum
 
-def carry_around_add(a, b):
-    c = a + b
-    return (c & 0xffff) + (c >> 16)
-
 def checksum(msg):
     l = len(msg)
     out = bytearray(msg)
@@ -14,16 +10,18 @@ def checksum(msg):
     out[8] = 0x00
     out[9] = 0x01
 
+    s = 0
     if l & 1:
         out += b"\x00"
-    s = 0
-    for i in range(0, l, 2):
-        w = out[i] + (out[i+1] << 8)
-        s = carry_around_add(s, w)
+
+    for i in range(0,l,2):
+        s = s +((out[i]<<8)+(out[i+1]))
+    s = s + (s >>16)
 
     # embed new checksum
-    out[8] = (~s >> 8) & 0xff
-    out[9] = ~s & 0xff
+    out[8] = ~s & 0xff
+    out[9] = (~s >> 8) & 0xff
+
     return bytes(out[:l])
 
 #---------------------------------------------
@@ -32,8 +30,6 @@ import usb
 import argparse
 from sys import exit, platform
 import struct
-
-#from hexdump import *
 
 def main():
     from optparse import OptionParser
@@ -115,12 +111,12 @@ def main():
 
         if data:
             if options.verbose:
-                #print(hexdump(data))
                 print(bytes(data[10:]).decode("ascii"))
 
             # auto-magically determine segment size
             if not options.size:
                 #options.size = 0x01600000
+                print("Forcing short read as Checksum() needs fixing...")
                 options.size = 1506
 
             print("Writing data to file:", args[0])
@@ -146,7 +142,6 @@ def main():
 
                         if data:
                             if options.verbose:
-                                #print(hexdump(data))
                                 print(".", end="")
 
                             if i == 0:
@@ -183,7 +178,6 @@ def main():
 
         if data:
             if options.verbose:
-                #print(hexdump(data))
                 print(bytes(data[10:]).decode("ascii"))
 
 
