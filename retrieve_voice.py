@@ -1,5 +1,4 @@
 
-
 # modified implementation of 'TCP' checksum
 
 def checksum(msg):
@@ -8,7 +7,7 @@ def checksum(msg):
 
     # preset checksum
     out[8] = 0x00
-    out[9] = 0x01
+    out[9] = 0x00
 
     s = 0
     if l & 1:
@@ -16,7 +15,12 @@ def checksum(msg):
 
     for i in range(0,l,2):
         s = s +((out[i]<<8)+(out[i+1]))
-    s = s + (s >>16)
+
+    s = s + (s >>16) + 1
+    if (s & 0xF000) == 0:
+        s -= 1
+        if (s & 0xF00) == 0xF00:
+            s += 1
 
     # embed new checksum
     out[8] = ~s & 0xff
@@ -117,7 +121,7 @@ def main():
             if not options.size:
                 #options.size = 0x01600000
                 print("Forcing short read as Checksum() needs fixing...")
-                options.size = 1506
+                options.size = 74296
 
             print("Writing data to file:", args[0])
             outfile = open(args[0], "wb")
@@ -159,8 +163,12 @@ def main():
                                     todo = 0
     
                     # update counters
-                    add += 502
-                    seq += 1
+                    if seq & 0xf == 0xf:
+                        seq = (seq & 0xfff0) + 0x100
+                        add += 0x0001D896
+                    else:
+                        seq += 1
+                        add += 0x01f6
 
                     if options.verbose:
                         print("")
