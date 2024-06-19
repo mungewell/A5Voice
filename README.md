@@ -8,10 +8,12 @@ The `A5Voice.py` script can `--unpack` existing waveforms and `--pack` new ones 
 
 Process with be updated as we find out more, but is basically:
 
-- Use ASM dev tool to retrieve 'A5Voice' segment from keyboard
+- Use ~~ASM dev tool~~ our Python script to (painfully slowly[^1]) retrieve 'A5Voice' segment from keyboard
 - Use our Python script to '--unpack/--pack' waveforms as needed
-- Use ASM dev tool to pack into a '.dat' file
+- Use ~~ASM dev tool~~ our Python script to pack directly into a '.dat' file
 - Use normal ASM updater to load to keyboard
+
+[^1]: One hour download, but this only needs to be done once.
 
 At present this has only been tested on the HydraSynth Explorer, although the other keyboards may use the same schema/data structures.
 
