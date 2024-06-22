@@ -20,7 +20,10 @@ do
 	convert  -size 640x50 xc:none -box white -pointsize 20 -gravity west -draw "text 0,0 '$target:'" -font /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf montage_"$target".png
 
 	export pics=`ls *.raw.wav.png | sort -t '_'  -k3,3n | xargs echo`
-	export tile=1x`echo $pics|wc -w`
+	echo $pics
+	export count=`echo $pics|wc -w`
+	export tile=1x`echo $(($count + 1))`
+	echo $tile
 
 	# build montage
 	montage -geometry 660x -tile $tile montage_"$target".png $pics montage_"$target".png 
